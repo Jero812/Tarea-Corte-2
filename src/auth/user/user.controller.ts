@@ -22,18 +22,19 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
+    @Permissions('manage_users')
     create(@Body() createUserDto: CreateUserDto) {
         return this.userService.create(createUserDto);
     }
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    @UseGuards(AuthGuard('jwt'), PermissionsGuard)
     @Permissions('manage_users')
     findAll() {
         return this.userService.findAll();
@@ -41,12 +42,14 @@ export class UserController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
+    @Permissions('manage_users')
     findOne(@Param('id', PositiveIntPipe) id: number) {
         return this.userService.findOne(id);
     }
 
     @Patch(':id')
     @HttpCode(HttpStatus.OK)
+    @Permissions('manage_users')
     async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         try {
             return await this.userService.update(+id, updateUserDto);
@@ -64,6 +67,7 @@ export class UserController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @Permissions('manage_users')
     async remove(@Param('id') id: string) {
         await this.userService.remove(+id);
     }

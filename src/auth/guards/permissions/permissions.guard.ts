@@ -12,12 +12,15 @@ interface AuthenticatedRequest extends Request {
 @Injectable()
 export class PermissionsGuard implements CanActivate {
     constructor(private readonly reflector: Reflector) {}
+
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        // 1. Extraemos los permisos requeridos del método manejador
-        const requiredPermissions = this.reflector.get<string[]>(PERMISSIONS_KEY, context.getHandler());
+        const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
 
         if (!requiredPermissions || requiredPermissions.length === 0) {
-            return true;
+            throw new ForbiddenException('Acceso denegado: esta operacion no tiene permisos configurados');
         }
 
         const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
@@ -33,7 +36,7 @@ export class PermissionsGuard implements CanActivate {
         );
 
         if (!hasAllRequiredPermissions) {
-            throw new ForbiddenException('Acceso denegado: No cuentas con los permisos suficientes para esta acción');
+            throw new ForbiddenException('Acceso denegado: no cuentas con permisos suficientes para esta accion');
         }
         return true;
     }

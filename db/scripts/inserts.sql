@@ -13,10 +13,24 @@ INSERT INTO permissions (name, description) VALUES
 ('manage_roles', 'Manage roles and permissions'),
 ('manage_exercises', 'Manage exercise catalog');
 
+-- Activity access permissions are separate from routine permissions because logs and performed exercises are personal records.
+INSERT INTO permissions (name, description) VALUES
+('create_activity', 'Create activity logs and performed exercises'),
+('read_activity', 'Read activity logs and performed exercises'),
+('update_activity', 'Update activity logs and performed exercises'),
+('delete_activity', 'Delete activity logs and performed exercises');
+
 -- Insert Role-Permission relationships
 INSERT INTO role_permissions (role_id, permission_id) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), -- Admin has all permissions
 (2, 1), (2, 2), (2, 3), (2, 4);                         -- Regular user can manage their routines
+
+-- Grant activity-record permissions to the roles described above; resolve IDs by name instead of assuming sequence values.
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT roles.id, permissions.id
+FROM roles CROSS JOIN permissions
+WHERE roles.name IN ('admin', 'user')
+  AND permissions.name IN ('create_activity', 'read_activity', 'update_activity', 'delete_activity');
 
 -- Insert Users
 INSERT INTO users (username, email, password_hash, bio, role_id, created_at) VALUES

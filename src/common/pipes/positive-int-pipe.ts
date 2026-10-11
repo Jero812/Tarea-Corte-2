@@ -6,9 +6,9 @@
 @Injectable()
 export class PositiveIntPipe implements PipeTransform<string, number> {
     transform(value: string, metadata: ArgumentMetadata): number {
-        const val = parseInt(value, 10);
+        const val = Number(value);
 
-        if (isNaN(val)) {
+        if (!/^-?\d+$/.test(value) || !Number.isSafeInteger(val)) {
             throw new BadRequestException(`El parámetro '${metadata.data ?? 'id'}' debe ser un número entero válido.`);
         }
 
